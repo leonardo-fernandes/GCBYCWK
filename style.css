@@ -34,7 +34,7 @@ button {
 
 dialog {
     inset: 50% 0;
-    max-width: min(400px, 90vw);
+    max-width: min(400px, 80vw);
     z-index: 400;
 }
 
