@@ -51,9 +51,10 @@ dialog.playing[open] {
 }
 
 dialog.playing canvas {
-    height: 2em;
-    width: 2em;
-    min-width: 2em;
+    margin: -1em 0;
+    height: 4em;
+    width: 4em;
+    min-width: 4em;
     border-radius: 100%;
     overflow: clip;
 }

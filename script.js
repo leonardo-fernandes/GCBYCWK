@@ -85,8 +85,8 @@ const path = [
     finalPoint
 ];
 
-const inRadius = 20;
-const outRadius = 40;
+const inRadius = 15;
+const outRadius = 35;
 const gameOverTimeout = 30;
 const gameAbortRadius = 200;
 
@@ -278,8 +278,10 @@ async function setAudioVolume(distance) {
     if (distance <= inRadius) {
         audioGain.gain.linearRampToValueAtTime(1, then);
     } else if (distance <= outRadius) {
-        let level = Math.pow(1 - (distance - inRadius) / (outRadius - inRadius), 2);
-        audioGain.gain.linearRampToValueAtTime(level, then);
+        // Set level to fall off linearly from 1 to 0
+        let level = 1 - (distance - inRadius) / (outRadius - inRadius);
+        // Use a power to accentuate the fall off
+        audioGain.gain.linearRampToValueAtTime(Math.pow(level, 3), then);
     } else {
         audioGain.gain.linearRampToValueAtTime(0, then);
     }
