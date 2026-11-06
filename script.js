@@ -11,6 +11,8 @@ const restartButton = document.querySelector("button#restart");
 const message = document.querySelector("#message");
 const status = document.querySelector("#status");
 const visualizer = document.querySelector("#audio-visualizer");
+const finalCoordinates = final.querySelector("p.coordinates");
+const finalHint = final.querySelector("p.hint");
 
 const iosAudio = document.querySelector("#ios-audio");
 
@@ -28,7 +30,7 @@ const startingPoint = [F("-27.623500"), F("153.153407")];
 const finalPoint    = [F("-27.618850"), F("153.155566")];
 
 const cacheCoordinates = "S27 37.132 E153 09.333";
-const cacheHint = "Search under the bench.";
+const cacheHint = "Hint: search under the bench.";
 
 const route = [
     startingPoint,
@@ -179,7 +181,12 @@ map.on("locationfound", (e) => {
                 // Player reached final point
                 state = "final";
                 playing.close();
+
+                finalCoordinates.textContent = cacheCoordinates;
+                finalHint.textContent = cacheHint;
                 final.showModal();
+                window.getSelection().selectAllChildren(finalCoordinates);
+
                 playFinalAudio();
             }
         }
@@ -196,7 +203,9 @@ map.on("locationfound", (e) => {
                 // Game over
                 state = "over";
                 playing.close();
+
                 over.showModal();
+
                 playOverAudio();
             }
         }
@@ -310,6 +319,7 @@ async function playOverAudio() {
 }
 
 
+// A visualizer supports hard-of-hearing players
 function drawVisualizer() {
     const w = visualizer.clientWidth, h = visualizer.clientHeight;
     visualizer.width = w;

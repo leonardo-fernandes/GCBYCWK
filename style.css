@@ -59,8 +59,10 @@ dialog.playing canvas {
     overflow: clip;
 }
 
-textarea {
-    field-sizing: content;
+.coordinates {
     font-size: 2em;
-    padding: 20px 60px;
+    user-select: all;
+}
+.hint {
+    font-weight: bold;
 }
