@@ -19,75 +19,80 @@ const finalMp3 = fetch("res/OOT_Secret.wav").then(res => res.arrayBuffer());
 const overMp3 = fetch("res/73 Game Over.mp3").then(res => res.arrayBuffer());
 let audioCtx, audioSource, audioGain, audioAnalyser, audioAnalyserData, finalSource, overSource;
 
+const F = Number.parseFloat; // Decimal coordinates are stored as strings and parsed at runtime, this results in better source code obfuscation
 
-const initialView = [-27.623, 153.153], initialZoom = 20;
+const initialView = [F("-27.623"), F("153.153")];
+const initialZoom = 20;
 
+const startingPoint = [F("-27.623500"), F("153.153407")];
+const finalPoint    = [F("-27.618850"), F("153.155566")];
 
-const startingPoint = [-27.623500, 153.153407];
-const finalPoint = [-27.618850, 153.155566];
-const path = [
+const cacheCoordinates = "S27 37.132 E153 09.333";
+const cacheHint = "Search under the bench.";
+
+const route = [
     startingPoint,
-    [-27.623386, 153.152935],
-    [-27.623348, 153.152584],
-    [-27.623215, 153.152560],
-    [-27.622953, 153.152589],
-    [-27.622970, 153.152433],
-    [-27.622949, 153.152318],
-    [-27.622906, 153.152227],
-    [-27.622816, 153.152230],
-    [-27.622737, 153.152270],
-    [-27.622661, 153.152272],
-    [-27.622611, 153.152423],
-    [-27.622552, 153.152498],
-    [-27.622504, 153.152637],
-    [-27.622953, 153.152589],
-    [-27.622970, 153.152433],
-    [-27.622949, 153.152318],
-    [-27.622906, 153.152227],
-    [-27.622816, 153.152230],
-    [-27.622737, 153.152270],
-    [-27.622661, 153.152272],
-    [-27.622611, 153.152423],
-    [-27.622552, 153.152498],
-    [-27.622504, 153.152637],
-    [-27.622326, 153.152854],
-    [-27.622110, 153.153353],
-    [-27.621982, 153.153688],
-    [-27.621733, 153.154133],
-    [-27.621684, 153.154115],
-    [-27.621646, 153.154058],
-    [-27.621608, 153.154160],
-    [-27.621307, 153.154597],
-    [-27.621242, 153.154606],
-    [-27.621190, 153.154472],
-    [-27.621050, 153.153900],
-    [-27.620700, 153.153300],
-    [-27.620575, 153.152978],
-    [-27.620529, 153.153044],
-    [-27.620358, 153.153168],
-    [-27.620228, 153.153388],
-    [-27.620211, 153.153632],
-    [-27.620180, 153.153887],
-    [-27.619942, 153.154560],
-    [-27.619553, 153.154630],
-    [-27.619424, 153.154705],
-    [-27.619355, 153.154839],
-    [-27.619332, 153.155120],
-    [-27.619282, 153.155220],
-    [-27.619132, 153.155273],
+    [F("-27.623386"), F("153.152935")],
+    [F("-27.623348"), F("153.152584")],
+    [F("-27.623215"), F("153.152560")],
+    [F("-27.622953"), F("153.152589")],
+    [F("-27.622970"), F("153.152433")],
+    [F("-27.622949"), F("153.152318")],
+    [F("-27.622906"), F("153.152227")],
+    [F("-27.622816"), F("153.152230")],
+    [F("-27.622737"), F("153.152270")],
+    [F("-27.622661"), F("153.152272")],
+    [F("-27.622611"), F("153.152423")],
+    [F("-27.622552"), F("153.152498")],
+    [F("-27.622504"), F("153.152637")],
+    [F("-27.622953"), F("153.152589")],
+    [F("-27.622970"), F("153.152433")],
+    [F("-27.622949"), F("153.152318")],
+    [F("-27.622906"), F("153.152227")],
+    [F("-27.622816"), F("153.152230")],
+    [F("-27.622737"), F("153.152270")],
+    [F("-27.622661"), F("153.152272")],
+    [F("-27.622611"), F("153.152423")],
+    [F("-27.622552"), F("153.152498")],
+    [F("-27.622504"), F("153.152637")],
+    [F("-27.622326"), F("153.152854")],
+    [F("-27.622110"), F("153.153353")],
+    [F("-27.621982"), F("153.153688")],
+    [F("-27.621733"), F("153.154133")],
+    [F("-27.621684"), F("153.154115")],
+    [F("-27.621646"), F("153.154058")],
+    [F("-27.621608"), F("153.154160")],
+    [F("-27.621307"), F("153.154597")],
+    [F("-27.621242"), F("153.154606")],
+    [F("-27.621190"), F("153.154472")],
+    [F("-27.621050"), F("153.153900")],
+    [F("-27.620700"), F("153.153250")],
+    [F("-27.620575"), F("153.152978")],
+    [F("-27.620529"), F("153.153044")],
+    [F("-27.620358"), F("153.153168")],
+    [F("-27.620228"), F("153.153388")],
+    [F("-27.620211"), F("153.153632")],
+    [F("-27.620180"), F("153.153887")],
+    [F("-27.619942"), F("153.154560")],
+    [F("-27.619553"), F("153.154630")],
+    [F("-27.619424"), F("153.154705")],
+    [F("-27.619355"), F("153.154839")],
+    [F("-27.619332"), F("153.155120")],
+    [F("-27.619282"), F("153.155220")],
+    [F("-27.619132"), F("153.155273")],
     finalPoint
 ];
 
-const inRadius = 15;
-const outRadius = 35;
-const gameOverTimeout = 30;
-const gameAbortRadius = 200;
+const inRadius = 10; // Distance within which the player is 100% in-route
+const outRadius = 30; // Distance outside of which the player is off-route
+const gameOverTimeout = 30; // Seconds to trigger a game over if the player remains off-route
+const gameAbortRadius = 200; // Distance outside of which triggers a game over immediately
 
 const DEBUG = true;
 
 let state = "initial";
 let waypoint = 0;
-let leftPathSince = null;
+let leftRouteSince = null;
 
 
 let map = L.map('map').setView(initialView, initialZoom);
@@ -101,9 +106,11 @@ L.circle(startingPoint, inRadius, { color: 'red' }).addTo(map);
 
 
 if (DEBUG) {
-    L.polyline(path, { color: 'red' }).addTo(map);
+    // Draws the route on the map (only for debugging)
+    L.polyline(route, { color: 'red' }).addTo(map);
 }
 if (DEBUG) {
+    // Transform clicks on the map into locationfound events to simulate a player's walk (only for debugging)
     map.on("click", (e) => {
         console.log(`[${e.latlng.lat}, ${e.latlng.lng}]`);
 
@@ -150,21 +157,21 @@ map.on("locationfound", (e) => {
     }
 
     if (state == "playing") {
-        // At each moment, only consider a slice of the path close to the current waypoint,
-        // so we can support paths that loop back on themselves while still guiding the player
+        // At each moment, only consider a slice of the route close to the current waypoint,
+        // so we can support routes that loop back on themselves while still guiding the player
         // along the intended sequence of waypoints.
-        let pathSlice = [Math.max(0, waypoint), waypoint + 5];
-        let currentPath = turf.lineString(path.slice(pathSlice[0], pathSlice[1]).map(p => p.toReversed()));
-        let nearestPoint = turf.nearestPointOnLine(currentPath, player, { units: "m" });
+        let routeSlice = [Math.max(0, waypoint), waypoint + 5];
+        let currentRoute = turf.lineString(route.slice(routeSlice[0], routeSlice[1]).map(p => p.toReversed()));
+        let nearestPoint = turf.nearestPointOnLine(currentRoute, player, { units: "m" });
 
-        waypoint = Math.max(waypoint, pathSlice[0] + nearestPoint.properties.segmentIndex);
+        waypoint = Math.max(waypoint, routeSlice[0] + nearestPoint.properties.segmentIndex);
 
         setAudioVolume(nearestPoint.properties.pointDistance);
         if (DEBUG) {
             status.textContent = `: ${nearestPoint.properties.pointDistance.toFixed(0)}m`;
         }
 
-        if (waypoint >= path.length - 3) {
+        if (waypoint >= route.length - 3) {
             // Only check for final when close to the last waypoint
             let distance = turf.distance(player, finish, { units: "m" });
 
@@ -178,14 +185,14 @@ map.on("locationfound", (e) => {
         }
 
         if (nearestPoint.properties.pointDistance <= outRadius) {
-            leftPathSince = null;
+            leftRouteSince = null;
         } else {
             let now = Date.now();
-            if (leftPathSince == null) {
-                leftPathSince = now;
+            if (leftRouteSince == null) {
+                leftRouteSince = now;
             }
 
-            if (nearestPoint.properties.pointDistance > gameAbortRadius || now - leftPathSince > gameOverTimeout * 1000) {
+            if (nearestPoint.properties.pointDistance > gameAbortRadius || now - leftRouteSince > gameOverTimeout * 1000) {
                 // Game over
                 state = "over";
                 playing.close();
